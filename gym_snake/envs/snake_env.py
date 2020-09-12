@@ -7,7 +7,7 @@ import numpy as np
 class SnakeEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, dim=5):
+    def __init__(self, dim=6):
 
         self.dim = dim
         self.space = np.zeros((dim, dim))
@@ -15,6 +15,8 @@ class SnakeEnv(gym.Env):
         self.action_space = spaces.Discrete(4)
         self.apple = []
         self.snake = []
+        self.total = 0
+        self.steps = 0
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -25,13 +27,13 @@ class SnakeEnv(gym.Env):
         done = False
         x = self.snake[0][0]
         y = self.snake[0][1]
-        if action == 0:  # up
+        if action == 0:  # left
             y = self.snake[0][1] - 1
-        elif action == 1:  # left
+        elif action == 1:  # up
             x = self.snake[0][0] - 1
-        elif action == 2:  # down
+        elif action == 2:  # right
             y = self.snake[0][1] + 1
-        elif action == 3:  # right
+        elif action == 3:  # down
             x = self.snake[0][0] + 1
         if self.valid(x, y):
             self.snake.insert(0, [x, y])
@@ -40,6 +42,12 @@ class SnakeEnv(gym.Env):
                 self.new_apple()
             else:
                 self.snake.remove(self.snake[-1])
+        else: # invalid move
+            reward = -2
+        self.total += reward
+        self.steps += 1
+        if self.total < -200 or self.steps == 200:
+            done = True
         return (self.snake[0][0], self.snake[0][1], self.apple[0], self.apple[1]), reward, done, {}
 
     def reset(self):
@@ -47,14 +55,37 @@ class SnakeEnv(gym.Env):
         X, Y = h[0], h[1]
         self.snake = [[X, Y]]
         self.new_apple()
+        self.total = 0
+        self.steps = 0
         return X, Y, self.apple[0], self.apple[1]
 
     def render(self, mode='human'):
-        print("Head at %d,%d length:%d Apple at %d,%d" % (
-            self.snake[0][0], self.snake[0][1], len(self.snake), self.apple[0], self.apple[1]))
+        x, y = self.apple[0], self.apple[1]
+#         print("Head at %d,%d length:%d Apple at %d,%d" % (
+#             self.snake[0][0], self.snake[0][1], len(self.snake), x, y))
+        a = np.zeros((self.dim, self.dim))
+        a[x][y] = 3 # apple
+        head = True
+        for s in self.snake:
+            if head:
+                a[s[0], s[1]] = 1 # snake head
+                head = False
+            else:
+                a[s[0], s[1]] = 2 # snake tail
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if a[i, j] == 0:
+                    print(". ", end='')
+                elif a[i, j] == 1:
+                    print("O ", end='')
+                elif a[i, j] == 2:
+                    print("o ", end='')
+                elif a[i, j] == 3:
+                    print("A ", end='')
+            print('')
 
     def close(self):
-        pass
+        pass    
 
     def valid(self, x, y):
         if x < 0 or y < 0:
