@@ -2,10 +2,10 @@ import numpy as np
 
 class Agent():
     '''
-    Generic agent for Q learning
+    Classical implementation of a generic agent for Q learning. 
+    Nothing specific for the Snake.
     '''
-    def __init__(self, lr, gamma, n_actions, n_states, eps_start, eps_end,
-                 eps_dec):
+    def __init__(self, lr, gamma, n_actions, n_states, eps_start, eps_end, eps_dec, rand=False):
         self.lr = lr
         self.gamma = gamma
         self.n_actions = n_actions
@@ -13,7 +13,7 @@ class Agent():
         self.epsilon = eps_start
         self.eps_min = eps_end
         self.eps_dec = eps_dec
-
+        self.random = rand
         self.Q = {}
 
         self.init_Q()
@@ -25,10 +25,15 @@ class Agent():
 
     def choose_action(self, state):
         if np.random.random() < self.epsilon:
-            action = np.random.choice([i for i in range(self.n_actions)])
+            action = np.random.choice(self.n_actions)
         else:
-            actions = np.array([self.Q[(state, a)] for a in range(self.n_actions)])
-            action = np.argmax(actions)
+            q = np.array([self.Q[(state, a)] for a in range(self.n_actions)])
+            if self.random:
+                exp_q = np.exp(q)
+                probs = exp_q/exp_q.sum() # softmax
+                action = np.random.choice(self.n_actions, p=probs)
+            else:
+                action = np.argmax(q)
         return action
 
     def decrement_epsilon(self):
@@ -42,3 +47,5 @@ class Agent():
                                         self.gamma*self.Q[(state_, a_max)] -
                                         self.Q[(state, action)])
         self.decrement_epsilon()
+
+print("Q-learning agent v0.0.2")
