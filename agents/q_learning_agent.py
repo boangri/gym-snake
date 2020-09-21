@@ -5,7 +5,7 @@ class Agent():
     Classical implementation of a generic agent for Q learning. 
     Nothing specific for the Snake.
     '''
-    def __init__(self, lr, gamma, n_actions, n_states, eps_start, eps_end, eps_dec, rand=False):
+    def __init__(self, lr, gamma, n_actions, n_states, eps_start, eps_end, eps_dec, rand=True):
         self.lr = lr
         self.gamma = gamma
         self.n_actions = n_actions
@@ -47,5 +47,11 @@ class Agent():
                                         self.gamma*self.Q[(state_, a_max)] -
                                         self.Q[(state, action)])
         self.decrement_epsilon()
+        
+    def save(self, filename='qtable.npy'):
+        np.save(filename, self.Q)
+        
+    def load(self, filename='qtable.npy'):
+        self.Q = np.load(filename, allow_pickle=True)
 
-print("Q-learning agent v0.0.2")
+print("Q-learning agent v0.0.4")
