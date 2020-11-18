@@ -2,14 +2,16 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 import numpy as np
+import pygame
 
 
 class SnakeEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, dim=20):
+    def __init__(self, dim=20, size=20, fps=4):
 
         self.dim = dim
+        self.size = size
         self.space = np.zeros((dim, dim))
         self.observation_space = spaces.Discrete(dim * dim)
         self.action_space = spaces.Discrete(4)
@@ -17,6 +19,8 @@ class SnakeEnv(gym.Env):
         self.snake = []
         self.total = 0
         self.steps = 0
+        self.fps = fps
+        self.ready = False # if pygame initialized
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -53,6 +57,7 @@ class SnakeEnv(gym.Env):
         self.steps += 1
         if self.steps == 200:
             done = True
+        self.score += reward
         return (self.snake[0][0], self.snake[0][1], self.apple[0], self.apple[1]), reward, done, {}
 
     def reset(self):
@@ -62,32 +67,26 @@ class SnakeEnv(gym.Env):
         self.new_apple()
         self.total = 0
         self.steps = 0
+        self.score = 0
         return X, Y, self.apple[0], self.apple[1]
 
     def render(self, mode='human'):
-        x, y = self.apple[0], self.apple[1]
-#         print("Head at %d,%d length:%d Apple at %d,%d" % (
-#             self.snake[0][0], self.snake[0][1], len(self.snake), x, y))
-        a = np.zeros((self.dim, self.dim))
-        a[x][y] = 3 # apple
-        head = True
-        for s in self.snake:
-            if head:
-                a[s[0], s[1]] = 1 # snake head
-                head = False
-            else:
-                a[s[0], s[1]] = 2 # snake tail
-        for i in range(self.dim):
-            for j in range(self.dim):
-                if a[i, j] == 0:
-                    print(". ", end='')
-                elif a[i, j] == 1:
-                    print("O ", end='')
-                elif a[i, j] == 2:
-                    print("o ", end='')
-                elif a[i, j] == 3:
-                    print("A ", end='')
-            print('')
+        if not self.ready: # Initialization
+            self.ready = True
+            pygame.init()
+            self.clock = pygame.time.Clock()
+            self.font_score = pygame.font.SysFont('Arial', 26, bold=True)
+            self.font_end = pygame.font.SysFont('Arial', 66, bold=True)
+        self.surface = pygame.display.set_mode([self.dim*self.size, self.dim*self.size])
+        [pygame.draw.rect(self.surface, pygame.Color('green'), (p[0]*self.size, p[1]*self.size, self.size - 1, self.size - 1)) for p in self.snake]
+        pygame.draw.rect(self.surface, pygame.Color('red'), (self.apple[0]*self.size, self.apple[1]*self.size, self.size, self.size))
+        # show score
+#         render_score = self.font_score.render('SCORE:      ', 1, pygame.Color('orange'))
+#         self.surface.blit(render_score, (5, 5))
+        render_score = self.font_score.render(f'SCORE: {self.score}', 1, pygame.Color('orange'))
+        self.surface.blit(render_score, (5, 5))
+        pygame.display.flip()
+        self.clock.tick(self.fps)
 
     def close(self):
         pass    
@@ -97,8 +96,9 @@ class SnakeEnv(gym.Env):
             return False
         if x >= self.dim or y >= self.dim:
             return False
-        if [x, y] in self.snake:
-            return False
+        for p in self.snake:
+            if x == p[0] and y == p[1]:
+                return False
         return True
 
     def in_snake(self, x, y):
