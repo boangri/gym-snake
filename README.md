@@ -31,5 +31,23 @@ git clone https://github.com/boangri/gym-snake.git
 pip install -e gym-snake
 ```
 
-Различные версии агентов находятся в каталоге agents
+Пример случайного агента:
 
+```
+import gym
+import gym_snake
+
+env = gym.make('Snake-v0')
+observation = env.reset()
+done = False
+score = 0
+steps = 0
+while not done:
+    env.render()
+    action = env.action_space.sample()
+    observation, reward, done, info = env.step(action)
+    score += reward
+    steps += 1
+    print("step %d action %d => %d, total: %d" % (steps, action, reward, score))
+print("End of episode")
+```
