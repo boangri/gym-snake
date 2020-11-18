@@ -7,7 +7,7 @@ import numpy as np
 class SnakeEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, dim=6):
+    def __init__(self, dim=20):
 
         self.dim = dim
         self.space = np.zeros((dim, dim))
@@ -20,13 +20,14 @@ class SnakeEnv(gym.Env):
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
+        np.random.seed(seed)
         return [seed]
 
     def step(self, action):
-        reward = -1
         done = False
         x = self.snake[0][0]
         y = self.snake[0][1]
+        
         if action == 0:  # left
             y = self.snake[0][1] - 1
         elif action == 1:  # up
@@ -35,18 +36,22 @@ class SnakeEnv(gym.Env):
             y = self.snake[0][1] + 1
         elif action == 3:  # down
             x = self.snake[0][0] + 1
+        
         if self.valid(x, y):
             self.snake.insert(0, [x, y])
             if [x, y] == self.apple:
                 reward = 100  # съели яблоко, делаем новое
                 self.new_apple()
             else:
+                reward = -1
                 self.snake.remove(self.snake[-1])
         else: # invalid move
-            reward = -2
+            reward = -100
+            done = True
+            
         self.total += reward
         self.steps += 1
-        if self.total < -200 or self.steps == 200:
+        if self.steps == 200:
             done = True
         return (self.snake[0][0], self.snake[0][1], self.apple[0], self.apple[1]), reward, done, {}
 
