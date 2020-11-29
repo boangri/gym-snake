@@ -88,7 +88,7 @@ class SnakeEnv(gym.Env):
         pygame.display.flip()
         self.clock.tick(self.fps)
         a = pygame.surfarray.array3d(self.surface)
-        return a.transpose((1, 0, 2))
+        return np.transpose(a, (1, 0, 2))
 
     def close(self):
         pygame.quit()
