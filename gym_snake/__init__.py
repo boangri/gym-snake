@@ -5,4 +5,5 @@ register(
     entry_point='gym_snake.envs:SnakeEnv',
 )
 
-print('gym-snake v0.1.0')
+print('gym-snake v0.1.3')
+

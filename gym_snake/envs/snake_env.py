@@ -87,9 +87,11 @@ class SnakeEnv(gym.Env):
         self.surface.blit(render_score, (5, 5))
         pygame.display.flip()
         self.clock.tick(self.fps)
+        a = pygame.surfarray.array3d(self.surface)
+        return a.reshape(a.shape[1], a.shape[0], a.shape[2])
 
     def close(self):
-        pass    
+        pygame.quit()
 
     def valid(self, x, y):
         if x < 0 or y < 0:
