@@ -6,10 +6,7 @@ import pygame
 
 
 class SnakeEnv(gym.Env):
-    metadata = {
-        'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 4
-    }
+    metadata = {'render.modes': ['human']}
 
     def __init__(self, dim=20, size=20, fps=4):
 
@@ -24,7 +21,6 @@ class SnakeEnv(gym.Env):
         self.steps = 0
         self.fps = fps
         self.ready = False # if pygame initialized
-        self.viewer = None
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -81,7 +77,6 @@ class SnakeEnv(gym.Env):
             self.clock = pygame.time.Clock()
             self.font_score = pygame.font.SysFont('Arial', 26, bold=True)
             self.font_end = pygame.font.SysFont('Arial', 66, bold=True)
-            
         self.surface = pygame.display.set_mode([self.dim*self.size, self.dim*self.size])
         [pygame.draw.rect(self.surface, pygame.Color('green'), (p[0]*self.size, p[1]*self.size, self.size - 1, self.size - 1)) for p in self.snake]
         pygame.draw.rect(self.surface, pygame.Color('red'), (self.apple[0]*self.size, self.apple[1]*self.size, self.size, self.size))
@@ -92,7 +87,6 @@ class SnakeEnv(gym.Env):
         self.surface.blit(render_score, (5, 5))
         pygame.display.flip()
         self.clock.tick(self.fps)
-        return pygame.surfarray.array2d(self.surface)
 
     def close(self):
         pass    
