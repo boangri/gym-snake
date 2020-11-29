@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='gym_snake',
-      version='0.1.3',
+      version='0.1.4',
       description='Gym Snake Env',
       url='https://github.com/boangri/gym-snake',
       author='Boris Gribovskiy',
