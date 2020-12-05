@@ -6,7 +6,10 @@ import pygame
 
 
 class SnakeEnv(gym.Env):
-    metadata = {'render.modes': ['human']}
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second': 4
+    }
 
     def __init__(self, dim=20, size=20, fps=4):
 
@@ -81,8 +84,6 @@ class SnakeEnv(gym.Env):
         [pygame.draw.rect(self.surface, pygame.Color('green'), (p[0]*self.size, p[1]*self.size, self.size - 1, self.size - 1)) for p in self.snake]
         pygame.draw.rect(self.surface, pygame.Color('red'), (self.apple[0]*self.size, self.apple[1]*self.size, self.size, self.size))
         # show score
-#         render_score = self.font_score.render('SCORE:      ', 1, pygame.Color('orange'))
-#         self.surface.blit(render_score, (5, 5))
         render_score = self.font_score.render(f'SCORE: {self.score}', 1, pygame.Color('orange'))
         self.surface.blit(render_score, (5, 5))
         pygame.display.flip()
